@@ -1,0 +1,46 @@
+[
+  {
+    "users": 5,
+    "duration_s": 25.11,
+    "requests": 1038,
+    "errors": 0,
+    "error_rate_pct": 0.0,
+    "throughput_rps": 41.34,
+    "p50_ms": 23.05,
+    "p95_ms": 28.91,
+    "p99_ms": 35.76
+  },
+  {
+    "users": 10,
+    "duration_s": 25.07,
+    "requests": 2116,
+    "errors": 0,
+    "error_rate_pct": 0.0,
+    "throughput_rps": 84.39,
+    "p50_ms": 19.56,
+    "p95_ms": 28.48,
+    "p99_ms": 34.87
+  },
+  {
+    "users": 20,
+    "duration_s": 25.11,
+    "requests": 4205,
+    "errors": 0,
+    "error_rate_pct": 0.0,
+    "throughput_rps": 167.49,
+    "p50_ms": 17.25,
+    "p95_ms": 36.18,
+    "p99_ms": 63.88
+  },
+  {
+    "users": 30,
+    "duration_s": 25.16,
+    "requests": 6155,
+    "errors": 0,
+    "error_rate_pct": 0.0,
+    "throughput_rps": 244.63,
+    "p50_ms": 16.78,
+    "p95_ms": 58.43,
+    "p99_ms": 93.4
+  }
+]

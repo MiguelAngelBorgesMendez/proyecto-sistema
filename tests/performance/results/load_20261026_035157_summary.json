@@ -1,0 +1,14 @@
+{
+  "test": "load",
+  "users": 10,
+  "planned_duration_s": 600,
+  "actual_duration_s": 600.27,
+  "requests": 21897,
+  "errors": 0,
+  "error_rate_pct": 0.0,
+  "throughput_rps": 36.48,
+  "p50_ms": 19.58,
+  "p95_ms": 23.8,
+  "p99_ms": 31.32,
+  "completed_duration": true
+}

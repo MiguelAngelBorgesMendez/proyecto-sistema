@@ -1,0 +1,26 @@
+[
+  {
+    "test": "smoke",
+    "users": 1,
+    "duration_s": 20.14,
+    "requests": 120,
+    "errors": 0,
+    "error_rate_pct": 0.0,
+    "throughput_rps": 5.96,
+    "p50_ms": 19.25,
+    "p95_ms": 29.69,
+    "p99_ms": 32.92
+  },
+  {
+    "test": "smoke",
+    "users": 5,
+    "duration_s": 20.16,
+    "requests": 604,
+    "errors": 0,
+    "error_rate_pct": 0.0,
+    "throughput_rps": 29.96,
+    "p50_ms": 16.19,
+    "p95_ms": 29.76,
+    "p99_ms": 32.63
+  }
+]

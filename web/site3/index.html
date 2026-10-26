@@ -1,0 +1,108 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Website node 1 — Distributed E-Store</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
+  <link rel="stylesheet" href="/catalog.css">
+</head>
+<body class="bg-light">
+
+  <!-- Navbar principal -->
+  <nav class="navbar navbar-expand-lg navbar-dark bg-dark shadow-sm mb-4">
+    <div class="container">
+      <a class="navbar-brand d-flex align-items-center gap-2 fw-bold" href="#">
+        <i class="bi bi-shop text-warning fs-3"></i>
+        <span>Distributed E-Store</span>
+      </a>
+      <span class="badge bg-success px-3 py-2 fs-6 shadow-sm">
+        <i class="bi bi-hdd-network me-1"></i> Website node 3
+      </span>
+    </div>
+  </nav>
+
+  <div class="container pb-5">
+
+    <!-- API Explorer & Controls -->
+    <div class="card border-0 shadow-sm mb-4">
+      <div class="card-header bg-white border-0 pt-3 pb-0">
+        <h5 class="card-title text-secondary fs-6 mb-0">
+          <i class="bi bi-sliders me-2"></i>API Explorer
+        </h5>
+      </div>
+      <div class="card-body">
+        <div class="row g-3 align-items-center">
+          <div class="col-md-5">
+            <label for="api-endpoint" class="form-label text-muted small fw-bold">Endpoint</label>
+            <select id="api-endpoint" class="form-select border-primary">
+              <option value="/products/cheapest">GET /products/cheapest — cheapest products</option>
+              <option value="/products/ST-001/reviews">GET /products/ST-001/reviews — product reviews</option>
+              <option value="/">GET / — API information</option>
+              <option value="/health">GET /health — service health</option>
+            </select>
+          </div>
+          <div class="col-md-7 d-flex align-items-end gap-2 pt-4">
+            <button id="query-api" type="button" class="btn btn-primary shadow-sm flex-grow-1">
+              <i class="bi bi-send me-1"></i> Query endpoint
+            </button>
+            <button id="clear-cache" type="button" class="btn btn-outline-danger shadow-sm">
+              <i class="bi bi-trash me-1"></i> Clear Redis catalog cache
+            </button>
+          </div>
+        </div>
+        <p id="api-result-status" role="status" class="mt-2 text-muted fw-semibold"></p>
+        <ol id="api-trace" class="pipeline border rounded p-2 bg-light mt-2" aria-label="API explorer request pipeline"></ol>
+        <pre id="api-result" aria-live="polite" class="bg-dark text-success p-3 rounded mt-2 fs-6" style="max-height: 200px; overflow-y: auto;"></pre>
+      </div>
+    </div>
+
+    <!-- Live Request Traces -->
+    <div class="card border-0 shadow-sm mb-4">
+      <div class="card-header bg-dark text-white fw-semibold">
+        <i class="bi bi-activity text-info me-2"></i> Live request traces
+      </div>
+      <div class="card-body bg-white">
+        <p class="text-muted small">Each pipeline shows the components used by its API request.</p>
+
+        <h6 class="fw-bold text-secondary mt-3">Cheapest products</h6>
+        <ol id="products-trace" class="pipeline border rounded p-2 bg-light mb-3" aria-label="Cheapest products request pipeline"></ol>
+
+        <h6 class="fw-bold text-secondary">Product reviews (ST-001)</h6>
+        <ol id="reviews-trace" class="pipeline border rounded p-2 bg-light mb-0" aria-label="Product reviews request pipeline"></ol>
+      </div>
+    </div>
+
+    <!-- Layout de Productos y Reseñas -->
+    <div class="row g-4">
+      <div class="col-lg-7">
+        <div class="card border-0 shadow-sm h-100">
+          <div class="card-header bg-primary text-white">
+            <h5 class="mb-0 fs-6 fw-bold"><i class="bi bi-bag-check me-2"></i> Ten cheapest products</h5>
+          </div>
+          <div class="card-body">
+            <p id="status" class="text-muted fw-semibold">Loading products...</p>
+            <ol id="products" class="list-group list-group-numbered list-group-flush fs-6"></ol>
+          </div>
+        </div>
+      </div>
+
+      <div class="col-lg-5">
+        <div class="card border-0 shadow-sm h-100">
+          <div class="card-header bg-secondary text-white">
+            <h5 class="mb-0 fs-6 fw-bold"><i class="bi bi-chat-left-quote me-2"></i> Recent product reviews</h5>
+          </div>
+          <div class="card-body">
+            <p id="reviews-status" class="text-muted fw-semibold">Loading reviews...</p>
+            <ul id="reviews" class="list-group list-group-flush fs-6"></ul>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+  <script src="/catalog.js" defer></script>
+</body>
+</html>

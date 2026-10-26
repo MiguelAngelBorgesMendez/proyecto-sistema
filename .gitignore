@@ -1,0 +1,38 @@
+# Local environment files (keep the documented template tracked).
+.env
+.env.*
+!.env.example
+
+# Credentials, private keys, and certificates.
+secrets/
+**/secrets/
+*.secret
+*.credentials
+credentials.json
+*_credentials.json
+*.pem
+*.key
+*.p12
+*.pfx
+*.crt
+*.cer
+
+# Local database exports and backups.
+*.sql.gz
+*.dump
+*.bak
+backups/
+**/backups/
+
+
+# Archivos temporales y respaldos de desarrollo
+*.backup
+*.backup-*
+*.before-*
+*.respaldo
+*.bak
+
+# Dependencias y archivos locales
+node_modules/
+__pycache__/
+*.pyc

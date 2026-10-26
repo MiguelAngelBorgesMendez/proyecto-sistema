@@ -1,0 +1,712 @@
+name: distributed-three-tier
+
+services:
+  presentation-lb-master:
+    image: haproxy:3.2-alpine
+    ports:
+      - "80:80"
+    volumes:
+      - ./haproxy/presentation-master.cfg:/usr/local/etc/haproxy/haproxy.cfg:ro
+    restart: unless-stopped
+    depends_on:
+      web1:
+        condition: service_started
+      web2:
+        condition: service_started
+      web3:
+        condition: service_started
+    networks:
+      edge:
+        ipv4_address: 172.30.0.11
+
+  presentation-lb-backup:
+    image: haproxy:3.2-alpine
+    volumes:
+      - ./haproxy/presentation-backup.cfg:/usr/local/etc/haproxy/haproxy.cfg:ro
+    restart: unless-stopped
+    depends_on:
+      web1:
+        condition: service_started
+      web2:
+        condition: service_started
+      web3:
+        condition: service_started
+    networks:
+      edge:
+        ipv4_address: 172.30.0.12
+
+  presentation-keepalived-master:
+    build:
+      context: ./keepalived
+      args:
+        KEEPALIVED_CONFIG: presentation-master.conf
+    network_mode: "service:presentation-lb-master"
+    cap_add:
+      - NET_ADMIN
+      - NET_BROADCAST
+      - NET_RAW
+    restart: unless-stopped
+    depends_on:
+      presentation-lb-master:
+        condition: service_started
+
+  presentation-keepalived-backup:
+    build:
+      context: ./keepalived
+      args:
+        KEEPALIVED_CONFIG: presentation-backup.conf
+    network_mode: "service:presentation-lb-backup"
+    cap_add:
+      - NET_ADMIN
+      - NET_BROADCAST
+      - NET_RAW
+    restart: unless-stopped
+    depends_on:
+      presentation-lb-backup:
+        condition: service_started
+
+  web1:
+    image: nginx:alpine
+    hostname: webnode1
+    volumes:
+      - ./web/nginx.conf:/etc/nginx/conf.d/default.conf:ro
+      - ./web/site1:/usr/share/nginx/html:ro
+      - ./web/catalog.js:/usr/share/nginx/catalog.js:ro
+      - ./web/catalog.css:/usr/share/nginx/catalog.css:ro
+    depends_on:
+      - application-lb-master
+    networks:
+      - edge
+      - application
+
+  web2:
+    image: nginx:alpine
+    hostname: webnode2
+    volumes:
+      - ./web/nginx.conf:/etc/nginx/conf.d/default.conf:ro
+      - ./web/site2:/usr/share/nginx/html:ro
+      - ./web/catalog.js:/usr/share/nginx/catalog.js:ro
+      - ./web/catalog.css:/usr/share/nginx/catalog.css:ro
+    depends_on:
+      - application-lb-master
+    networks:
+      - edge
+      - application
+
+  web3:
+    image: nginx:alpine
+    hostname: webnode3
+    volumes:
+      - ./web/nginx.conf:/etc/nginx/conf.d/default.conf:ro
+      - ./web/site3:/usr/share/nginx/html:ro
+      - ./web/catalog.js:/usr/share/nginx/catalog.js:ro
+      - ./web/catalog.css:/usr/share/nginx/catalog.css:ro
+    depends_on:
+      - application-lb-master
+    networks:
+      - edge
+      - application
+
+  application-lb-master:
+    image: haproxy:3.2-alpine
+    volumes:
+      - ./haproxy/application-master.cfg:/usr/local/etc/haproxy/haproxy.cfg:ro
+    restart: unless-stopped
+    depends_on:
+      app1:
+        condition: service_started
+      app2:
+        condition: service_started
+      app3:
+        condition: service_started
+    networks:
+      application:
+        ipv4_address: 172.31.0.11
+
+  application-lb-backup:
+    image: haproxy:3.2-alpine
+    volumes:
+      - ./haproxy/application-backup.cfg:/usr/local/etc/haproxy/haproxy.cfg:ro
+    restart: unless-stopped
+    depends_on:
+      app1:
+        condition: service_started
+      app2:
+        condition: service_started
+      app3:
+        condition: service_started
+    networks:
+      application:
+        ipv4_address: 172.31.0.12
+
+  application-keepalived-master:
+    build:
+      context: ./keepalived
+      args:
+        KEEPALIVED_CONFIG: application-master.conf
+    network_mode: "service:application-lb-master"
+    cap_add:
+      - NET_ADMIN
+      - NET_BROADCAST
+      - NET_RAW
+    restart: unless-stopped
+    depends_on:
+      application-lb-master:
+        condition: service_started
+
+  application-keepalived-backup:
+    build:
+      context: ./keepalived
+      args:
+        KEEPALIVED_CONFIG: application-backup.conf
+    network_mode: "service:application-lb-backup"
+    cap_add:
+      - NET_ADMIN
+      - NET_BROADCAST
+      - NET_RAW
+    restart: unless-stopped
+    depends_on:
+      application-lb-backup:
+        condition: service_started
+
+  app1:
+    build: ./application
+    environment: &application-environment
+      DB_HOST: galera-proxy
+      DB_PORT: 3306
+      DB_NAME: ${CATALOG_DB_NAME:?Set CATALOG_DB_NAME in .env}
+      DB_USER: ${CATALOG_DB_USER:?Set CATALOG_DB_USER in .env}
+      DB_PASSWORD: ${CATALOG_DB_PASSWORD:?Set CATALOG_DB_PASSWORD in .env}
+      MONGO_HOST: mongodb
+      MONGO_PORT: 27017
+      MONGO_DB: ${MONGO_DB_NAME:?Set MONGO_DB_NAME in .env}
+      MONGO_USER: ${MONGO_ROOT_USERNAME:?Set MONGO_ROOT_USERNAME in .env}
+      MONGO_PASSWORD: ${MONGO_ROOT_PASSWORD:?Set MONGO_ROOT_PASSWORD in .env}
+      REDIS_HOST: redis
+      REDIS_PORT: 6379
+      APPLICATION_NODE: app1
+    restart: unless-stopped
+    depends_on:
+      catalog-init:
+        condition: service_completed_successfully
+    networks:
+      - application
+      - database
+
+  app2:
+    build: ./application
+    environment:
+      <<: *application-environment
+      APPLICATION_NODE: app2
+    restart: unless-stopped
+    depends_on:
+      catalog-init:
+        condition: service_completed_successfully
+    networks:
+      - application
+      - database
+
+  app3:
+    build: ./application
+    environment:
+      <<: *application-environment
+      APPLICATION_NODE: app3
+    restart: unless-stopped
+    depends_on:
+      catalog-init:
+        condition: service_completed_successfully
+    networks:
+      - application
+      - database
+
+
+
+  catalog-init:
+    build: ./application
+    command: ["node", "init-db.js"]
+    environment: *application-environment
+    volumes:
+      - ./database/catalog.sql:/app/database/catalog.sql:ro
+    restart: "no"
+    depends_on:
+      galera-proxy:
+        condition: service_healthy
+      mongo-init-replica:
+        condition: service_completed_successfully
+    networks:
+      - database
+
+
+  mongodb-keyfile-init:
+    image: alpine:3.20
+    command:
+      - /bin/sh
+      - -c
+      - |
+        apk add --no-cache openssl >/dev/null
+        if [ ! -s /keyfile/keyfile ]; then
+          openssl rand -base64 756 > /keyfile/keyfile
+        fi
+        chown 999:999 /keyfile/keyfile
+        chmod 400 /keyfile/keyfile
+    volumes:
+      - mongodb-keyfile-data:/keyfile
+    restart: "no"
+
+  mongodb:
+    image: mongo:8
+    command:
+      - mongod
+      - --replSet
+      - rs0
+      - --bind_ip_all
+      - --keyFile
+      - /run/mongo-secrets/keyfile
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: ${MONGO_ROOT_USERNAME:?Set MONGO_ROOT_USERNAME in .env}
+      MONGO_INITDB_ROOT_PASSWORD: ${MONGO_ROOT_PASSWORD:?Set MONGO_ROOT_PASSWORD in .env}
+    volumes:
+      - mongodb-data:/data/db
+      - mongodb-keyfile-data:/run/mongo-secrets:ro
+    depends_on:
+      mongodb-keyfile-init:
+        condition: service_completed_successfully
+    healthcheck:
+      test: ["CMD", "mongosh", "--eval", "db.adminCommand('ping')"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+      start_period: 10s
+    networks:
+      - database
+
+  mongodb2:
+    image: mongo:8
+    command:
+      - mongod
+      - --replSet
+      - rs0
+      - --bind_ip_all
+      - --keyFile
+      - /run/mongo-secrets/keyfile
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: ${MONGO_ROOT_USERNAME:?Set MONGO_ROOT_USERNAME in .env}
+      MONGO_INITDB_ROOT_PASSWORD: ${MONGO_ROOT_PASSWORD:?Set MONGO_ROOT_PASSWORD in .env}
+    volumes:
+      - mongodb2-data:/data/db
+      - mongodb-keyfile-data:/run/mongo-secrets:ro
+    depends_on:
+      mongodb-keyfile-init:
+        condition: service_completed_successfully
+    healthcheck:
+      test: ["CMD", "mongosh", "--eval", "db.adminCommand('ping')"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+      start_period: 10s
+    restart: unless-stopped
+    networks:
+      - database
+
+  mongo-arbiter:
+    image: mongo:8
+    command:
+      - mongod
+      - --replSet
+      - rs0
+      - --bind_ip_all
+      - --keyFile
+      - /run/mongo-secrets/keyfile
+    volumes:
+      - mongodb-arbiter-data:/data/db
+      - mongodb-keyfile-data:/run/mongo-secrets:ro
+    depends_on:
+      mongodb-keyfile-init:
+        condition: service_completed_successfully
+    healthcheck:
+      test: ["CMD", "mongosh", "--eval", "db.adminCommand('ping')"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+      start_period: 10s
+    restart: unless-stopped
+    networks:
+      - database
+
+
+  mongo-init-replica:
+    image: mongo:8
+    environment:
+      MONGO_ROOT_USERNAME: ${MONGO_ROOT_USERNAME:?Set MONGO_ROOT_USERNAME in .env}
+      MONGO_ROOT_PASSWORD: ${MONGO_ROOT_PASSWORD:?Set MONGO_ROOT_PASSWORD in .env}
+    depends_on:
+      mongodb:
+        condition: service_healthy
+      mongodb2:
+        condition: service_healthy
+      mongo-arbiter:
+        condition: service_healthy
+    entrypoint: ["/bin/sh", "-c"]
+    command:
+      - |
+        set -eu
+        mongosh --host mongodb:27017 \
+          --username "$$MONGO_ROOT_USERNAME" \
+          --password "$$MONGO_ROOT_PASSWORD" \
+          --authenticationDatabase admin \
+          --quiet --eval '
+            try {
+              rs.status();
+              print("Replica set ya inicializado");
+            } catch (e) {
+              if (e.code === 94 || e.codeName === "NotYetInitialized") {
+                rs.initiate({
+                  _id: "rs0",
+                  members: [{ _id: 0, host: "mongodb:27017" }]
+                });
+              } else {
+                throw e;
+              }
+            }
+          '
+        i=0
+        until mongosh --host mongodb:27017 \
+          --username "$$MONGO_ROOT_USERNAME" \
+          --password "$$MONGO_ROOT_PASSWORD" \
+          --authenticationDatabase admin \
+          --quiet --eval 'quit(rs.status().members.some(m => m.stateStr === "PRIMARY") ? 0 : 1)' \
+          >/dev/null 2>&1; do
+          i=$$((i + 1))
+          if [ "$$i" -ge 30 ]; then
+            echo "ERROR: MongoDB no llegó al estado PRIMARY"
+            exit 1
+          fi
+          sleep 2
+        done
+        echo "MongoDB rs0 está listo como PRIMARY"
+        mongosh --host mongodb:27017 \
+          --username "$$MONGO_ROOT_USERNAME" \
+          --password "$$MONGO_ROOT_PASSWORD" \
+          --authenticationDatabase admin \
+          --quiet --eval '
+            const cfg = rs.conf();
+            if (!cfg.members.some(m => m.host === "mongodb2:27017")) {
+              rs.add("mongodb2:27017");
+            }
+            const updated = rs.conf();
+            if (!updated.members.some(m => m.host === "mongo-arbiter:27017")) {
+              rs.addArb("mongo-arbiter:27017");
+            }
+            print("Replica set actualizado con el segundo nodo y el arbitro");
+          '
+    restart: "no"
+    networks:
+      - database
+
+
+
+
+  redis:
+    image: redis:7-alpine
+    entrypoint: ["/bin/sh", "/scripts/start-with-sentinel.sh"]
+    environment:
+      REDIS_SELF: redis
+    volumes:
+      - redis-secondary-existing:/data
+      - ./redis/start-with-sentinel.sh:/scripts/start-with-sentinel.sh:ro
+      - redis-sentinel1-data:/sentinel-state/1:ro
+      - redis-sentinel2-data:/sentinel-state/2:ro
+      - redis-sentinel3-data:/sentinel-state/3:ro
+    restart: unless-stopped
+    depends_on:
+      redis-replica:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 3s
+      retries: 5
+    networks:
+      database:
+        aliases:
+          - redis
+
+  redis-replica:
+    image: redis:7-alpine
+    entrypoint: ["/bin/sh", "/scripts/start-with-sentinel.sh"]
+    environment:
+      REDIS_SELF: redis-replica
+    volumes:
+      - redis-primary-existing:/data
+      - ./redis/start-with-sentinel.sh:/scripts/start-with-sentinel.sh:ro
+      - redis-sentinel1-data:/sentinel-state/1:ro
+      - redis-sentinel2-data:/sentinel-state/2:ro
+      - redis-sentinel3-data:/sentinel-state/3:ro
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 3s
+      retries: 5
+    networks:
+      database:
+        aliases:
+          - redis-replica
+
+  redis-sentinel1:
+    image: redis:7-alpine
+    command:
+      - sh
+      - -c
+      - |
+        if [ ! -s /sentinel/sentinel.conf ]; then
+          printf '%s\n' \
+            'port 26379' \
+            'dir /sentinel' \
+            'sentinel resolve-hostnames yes' \
+            'sentinel announce-hostnames yes' \
+            'sentinel monitor mymaster redis-replica 6379 2' \
+            'sentinel down-after-milliseconds mymaster 10000' \
+            'sentinel failover-timeout mymaster 60000' \
+            'sentinel parallel-syncs mymaster 1' \
+            > /sentinel/sentinel.conf
+        fi
+        exec redis-server /sentinel/sentinel.conf --sentinel
+    volumes:
+      - redis-sentinel1-data:/sentinel
+    healthcheck:
+      test: ["CMD", "redis-cli", "-p", "26379", "ping"]
+      interval: 10s
+      timeout: 3s
+      retries: 5
+    restart: unless-stopped
+    networks:
+      - database
+
+  redis-sentinel2:
+    image: redis:7-alpine
+    command:
+      - sh
+      - -c
+      - |
+        if [ ! -s /sentinel/sentinel.conf ]; then
+          printf '%s\n' \
+            'port 26379' \
+            'dir /sentinel' \
+            'sentinel resolve-hostnames yes' \
+            'sentinel announce-hostnames yes' \
+            'sentinel monitor mymaster redis-replica 6379 2' \
+            'sentinel down-after-milliseconds mymaster 10000' \
+            'sentinel failover-timeout mymaster 60000' \
+            'sentinel parallel-syncs mymaster 1' \
+            > /sentinel/sentinel.conf
+        fi
+        exec redis-server /sentinel/sentinel.conf --sentinel
+    volumes:
+      - redis-sentinel2-data:/sentinel
+    healthcheck:
+      test: ["CMD", "redis-cli", "-p", "26379", "ping"]
+      interval: 10s
+      timeout: 3s
+      retries: 5
+    restart: unless-stopped
+    networks:
+      - database
+
+  redis-sentinel3:
+    image: redis:7-alpine
+    command:
+      - sh
+      - -c
+      - |
+        if [ ! -s /sentinel/sentinel.conf ]; then
+          printf '%s\n' \
+            'port 26379' \
+            'dir /sentinel' \
+            'sentinel resolve-hostnames yes' \
+            'sentinel announce-hostnames yes' \
+            'sentinel monitor mymaster redis-replica 6379 2' \
+            'sentinel down-after-milliseconds mymaster 10000' \
+            'sentinel failover-timeout mymaster 60000' \
+            'sentinel parallel-syncs mymaster 1' \
+            > /sentinel/sentinel.conf
+        fi
+        exec redis-server /sentinel/sentinel.conf --sentinel
+    volumes:
+      - redis-sentinel3-data:/sentinel
+    healthcheck:
+      test: ["CMD", "redis-cli", "-p", "26379", "ping"]
+      interval: 10s
+      timeout: 3s
+      retries: 5
+    restart: unless-stopped
+    networks:
+      - database
+
+  galera-proxy:
+    build:
+      context: ./haproxy
+      dockerfile: Dockerfile.galera
+    image: distributed-galera-proxy:local
+    environment:
+      GALERA_CHECK_USER: ${CATALOG_DB_USER:?Set CATALOG_DB_USER in .env}
+      GALERA_CHECK_PASSWORD: ${CATALOG_DB_PASSWORD:?Set CATALOG_DB_PASSWORD in .env}
+    restart: unless-stopped
+    volumes:
+      - ./haproxy/galera.cfg:/usr/local/etc/haproxy/haproxy.cfg:ro
+    healthcheck:
+      test: ["CMD-SHELL", "nc -z 127.0.0.1 3306"]
+      interval: 10s
+      timeout: 3s
+      retries: 5
+    depends_on:
+      galera1:
+        condition: service_healthy
+      galera2:
+        condition: service_healthy
+      galera3:
+        condition: service_healthy
+
+    networks:
+      database:
+        aliases:
+          - galera-proxy
+
+  galera1:
+    image: bitnamilegacy/mariadb-galera:11.4.7-debian-12-r3
+    environment:
+      MARIADB_ROOT_PASSWORD: ${MARIADB_ROOT_PASSWORD:?Set MARIADB_ROOT_PASSWORD in .env}
+      MARIADB_DATABASE: ${CATALOG_DB_NAME:?Set CATALOG_DB_NAME in .env}
+      MARIADB_USER: ${CATALOG_DB_USER:?Set CATALOG_DB_USER in .env}
+      MARIADB_PASSWORD: ${CATALOG_DB_PASSWORD:?Set CATALOG_DB_PASSWORD in .env}
+      MARIADB_GALERA_CLUSTER_NAME: distributed-cluster
+      MARIADB_GALERA_CLUSTER_ADDRESS: gcomm://galera1,galera2,galera3
+      MARIADB_GALERA_CLUSTER_BOOTSTRAP: "yes"
+      MARIADB_GALERA_MARIABACKUP_USER: mariabackup
+      MARIADB_GALERA_MARIABACKUP_PASSWORD: ${MARIADB_BACKUP_PASSWORD:?Set MARIADB_BACKUP_PASSWORD in .env}
+    volumes:
+      - galera1-data:/bitnami/mariadb
+    healthcheck:
+      test: ["CMD-SHELL", "mariadb-admin ping -h 127.0.0.1 -u root -p\"$${MARIADB_ROOT_PASSWORD}\""]
+      interval: 10s
+      timeout: 5s
+      retries: 12
+      start_period: 60s
+    networks:
+      - database
+
+  galera2:
+    image: bitnamilegacy/mariadb-galera:11.4.7-debian-12-r3
+    environment:
+      MARIADB_ROOT_PASSWORD: ${MARIADB_ROOT_PASSWORD:?Set MARIADB_ROOT_PASSWORD in .env}
+      MARIADB_GALERA_CLUSTER_NAME: distributed-cluster
+      MARIADB_GALERA_CLUSTER_ADDRESS: gcomm://galera1,galera2,galera3
+      MARIADB_GALERA_CLUSTER_BOOTSTRAP: "no"
+      MARIADB_GALERA_MARIABACKUP_USER: mariabackup
+      MARIADB_GALERA_MARIABACKUP_PASSWORD: ${MARIADB_BACKUP_PASSWORD:?Set MARIADB_BACKUP_PASSWORD in .env}
+    volumes:
+      - galera2-data:/bitnami/mariadb
+    depends_on:
+      galera1:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD-SHELL", "mariadb-admin ping -h 127.0.0.1 -u root -p\"$${MARIADB_ROOT_PASSWORD}\""]
+      interval: 10s
+      timeout: 5s
+      retries: 12
+      start_period: 60s
+    networks:
+      - database
+
+  galera3:
+    image: bitnamilegacy/mariadb-galera:11.4.7-debian-12-r3
+    environment:
+      MARIADB_ROOT_PASSWORD: ${MARIADB_ROOT_PASSWORD:?Set MARIADB_ROOT_PASSWORD in .env}
+      MARIADB_GALERA_CLUSTER_NAME: distributed-cluster
+      MARIADB_GALERA_CLUSTER_ADDRESS: gcomm://galera1,galera2,galera3
+      MARIADB_GALERA_CLUSTER_BOOTSTRAP: "no"
+      MARIADB_GALERA_MARIABACKUP_USER: mariabackup
+      MARIADB_GALERA_MARIABACKUP_PASSWORD: ${MARIADB_BACKUP_PASSWORD:?Set MARIADB_BACKUP_PASSWORD in .env}
+    volumes:
+      - galera3-data:/bitnami/mariadb
+    depends_on:
+      galera1:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD-SHELL", "mariadb-admin ping -h 127.0.0.1 -u root -p\"$${MARIADB_ROOT_PASSWORD}\""]
+      interval: 10s
+      timeout: 5s
+      retries: 12
+      start_period: 60s
+    networks:
+      - database
+
+  nagios:
+    image: jasonrivers/nagios:latest
+    ports:
+      - "8088:80"
+    environment:
+      NAGIOSADMIN_USER: nagiosadmin
+      NAGIOSADMIN_PASS: ${NAGIOSADMIN_PASSWORD:?Set NAGIOSADMIN_PASSWORD in .env}
+    volumes:
+      - ./nagios/architecture.cfg:/opt/nagios/etc/objects/localhost.cfg:ro
+    depends_on:
+      - presentation-lb-master
+      - presentation-lb-backup
+      - presentation-keepalived-master
+      - presentation-keepalived-backup
+      - web1
+      - web2
+      - web3
+      - application-lb-master
+      - application-lb-backup
+      - application-keepalived-master
+      - application-keepalived-backup
+      - app1
+      - app2
+      - app3
+      - catalog-init
+      - galera1
+      - galera2
+      - galera3
+      - mongodb
+      - redis
+    networks:
+      - edge
+      - application
+      - database
+
+volumes:
+  redis-primary-existing:
+    external: true
+    name: e5bcb7ca975c24d9b03c4204b07cdd6b04f84f7c7abd1d3a9a97e3429877c087
+  redis-secondary-existing:
+    external: true
+    name: 70c39f3b2c487e2f686fd70a8656e96435c6f352c12645dca3882fe612a8c894
+  redis-sentinel1-data:
+  redis-sentinel2-data:
+  redis-sentinel3-data:
+  galera1-data:
+  galera2-data:
+  galera3-data:
+  mongodb-data:
+  mongodb-keyfile-data:
+  mongodb2-data:
+  mongodb-arbiter-data:
+
+networks:
+  edge:
+    ipam:
+      config:
+        - subnet: 172.30.0.0/24
+
+  application:
+    internal: true
+    ipam:
+      config:
+        - subnet: 172.31.0.0/24
+
+
+  database:
+    external: true
+    name: distributed-three-tier_database

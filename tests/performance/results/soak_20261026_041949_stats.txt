@@ -1,0 +1,70 @@
+===== 2026-10-26 04:19:49 =====
+distributed-three-tier-app1-1 | CPU 0.79% | RAM 135.6MiB / 5.788GiB
+distributed-three-tier-app2-1 | CPU 1.53% | RAM 124MiB / 5.788GiB
+distributed-three-tier-app3-1 | CPU 0.76% | RAM 115.8MiB / 5.788GiB
+distributed-three-tier-redis-1 | CPU 4.41% | RAM 5.25MiB / 5.788GiB
+distributed-three-tier-galera-proxy-1 | CPU 24.00% | RAM 76.98MiB / 5.788GiB
+distributed-three-tier-galera1-1 | CPU 0.93% | RAM 139MiB / 5.788GiB
+===== 2026-10-26 04:20:52 =====
+distributed-three-tier-app1-1 | CPU 1.26% | RAM 135.9MiB / 5.788GiB
+distributed-three-tier-app2-1 | CPU 1.34% | RAM 123.9MiB / 5.788GiB
+distributed-three-tier-app3-1 | CPU 1.13% | RAM 115.9MiB / 5.788GiB
+distributed-three-tier-redis-1 | CPU 0.93% | RAM 5.262MiB / 5.788GiB
+distributed-three-tier-galera-proxy-1 | CPU 0.26% | RAM 76.56MiB / 5.788GiB
+distributed-three-tier-galera1-1 | CPU 0.89% | RAM 139MiB / 5.788GiB
+===== 2026-10-26 04:21:54 =====
+distributed-three-tier-app1-1 | CPU 0.98% | RAM 135.9MiB / 5.788GiB
+distributed-three-tier-app2-1 | CPU 0.95% | RAM 123.9MiB / 5.788GiB
+distributed-three-tier-app3-1 | CPU 0.91% | RAM 116MiB / 5.788GiB
+distributed-three-tier-redis-1 | CPU 0.90% | RAM 5.254MiB / 5.788GiB
+distributed-three-tier-galera-proxy-1 | CPU 5.16% | RAM 80.5MiB / 5.788GiB
+distributed-three-tier-galera1-1 | CPU 0.21% | RAM 139MiB / 5.788GiB
+===== 2026-10-26 04:22:57 =====
+distributed-three-tier-app1-1 | CPU 0.99% | RAM 135.9MiB / 5.788GiB
+distributed-three-tier-app2-1 | CPU 1.05% | RAM 123.9MiB / 5.788GiB
+distributed-three-tier-app3-1 | CPU 1.11% | RAM 115.9MiB / 5.788GiB
+distributed-three-tier-redis-1 | CPU 0.93% | RAM 5.25MiB / 5.788GiB
+distributed-three-tier-galera-proxy-1 | CPU 5.12% | RAM 76.56MiB / 5.788GiB
+distributed-three-tier-galera1-1 | CPU 0.14% | RAM 139MiB / 5.788GiB
+===== 2026-10-26 04:23:59 =====
+distributed-three-tier-app1-1 | CPU 0.74% | RAM 135.9MiB / 5.788GiB
+distributed-three-tier-app2-1 | CPU 0.74% | RAM 123.9MiB / 5.788GiB
+distributed-three-tier-app3-1 | CPU 0.68% | RAM 115.9MiB / 5.788GiB
+distributed-three-tier-redis-1 | CPU 0.98% | RAM 5.25MiB / 5.788GiB
+distributed-three-tier-galera-proxy-1 | CPU 12.45% | RAM 76.7MiB / 5.788GiB
+distributed-three-tier-galera1-1 | CPU 0.14% | RAM 139MiB / 5.788GiB
+===== 2026-10-26 04:25:01 =====
+distributed-three-tier-app1-1 | CPU 1.23% | RAM 135.9MiB / 5.788GiB
+distributed-three-tier-app2-1 | CPU 0.98% | RAM 123.9MiB / 5.788GiB
+distributed-three-tier-app3-1 | CPU 0.89% | RAM 115.9MiB / 5.788GiB
+distributed-three-tier-redis-1 | CPU 4.11% | RAM 5.25MiB / 5.788GiB
+distributed-three-tier-galera-proxy-1 | CPU 0.21% | RAM 76.56MiB / 5.788GiB
+distributed-three-tier-galera1-1 | CPU 0.92% | RAM 139MiB / 5.788GiB
+===== 2026-10-26 04:26:03 =====
+distributed-three-tier-app1-1 | CPU 0.99% | RAM 135.9MiB / 5.788GiB
+distributed-three-tier-app2-1 | CPU 0.75% | RAM 123.9MiB / 5.788GiB
+distributed-three-tier-app3-1 | CPU 1.07% | RAM 116MiB / 5.788GiB
+distributed-three-tier-redis-1 | CPU 1.16% | RAM 5.25MiB / 5.788GiB
+distributed-three-tier-galera-proxy-1 | CPU 0.20% | RAM 76.56MiB / 5.788GiB
+distributed-three-tier-galera1-1 | CPU 0.92% | RAM 139MiB / 5.788GiB
+===== 2026-10-26 04:27:06 =====
+distributed-three-tier-app1-1 | CPU 1.28% | RAM 135.9MiB / 5.788GiB
+distributed-three-tier-app2-1 | CPU 1.56% | RAM 123.9MiB / 5.788GiB
+distributed-three-tier-app3-1 | CPU 1.19% | RAM 115.9MiB / 5.788GiB
+distributed-three-tier-redis-1 | CPU 0.94% | RAM 5.246MiB / 5.788GiB
+distributed-three-tier-galera-proxy-1 | CPU 0.21% | RAM 76.56MiB / 5.788GiB
+distributed-three-tier-galera1-1 | CPU 0.86% | RAM 139MiB / 5.788GiB
+===== 2026-10-26 04:28:08 =====
+distributed-three-tier-app1-1 | CPU 1.25% | RAM 135.9MiB / 5.788GiB
+distributed-three-tier-app2-1 | CPU 0.93% | RAM 123.9MiB / 5.788GiB
+distributed-three-tier-app3-1 | CPU 1.11% | RAM 115.9MiB / 5.788GiB
+distributed-three-tier-redis-1 | CPU 1.18% | RAM 5.242MiB / 5.788GiB
+distributed-three-tier-galera-proxy-1 | CPU 4.90% | RAM 76.62MiB / 5.788GiB
+distributed-three-tier-galera1-1 | CPU 0.28% | RAM 139MiB / 5.788GiB
+===== 2026-10-26 04:29:10 =====
+distributed-three-tier-app1-1 | CPU 1.24% | RAM 136MiB / 5.788GiB
+distributed-three-tier-app2-1 | CPU 1.73% | RAM 123.9MiB / 5.788GiB
+distributed-three-tier-app3-1 | CPU 1.68% | RAM 116.4MiB / 5.788GiB
+distributed-three-tier-redis-1 | CPU 1.04% | RAM 5.254MiB / 5.788GiB
+distributed-three-tier-galera-proxy-1 | CPU 4.11% | RAM 76.57MiB / 5.788GiB
+distributed-three-tier-galera1-1 | CPU 0.23% | RAM 139MiB / 5.788GiB

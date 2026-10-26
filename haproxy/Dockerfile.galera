@@ -1,0 +1,11 @@
+FROM haproxy:3.2-alpine
+
+USER root
+
+RUN apk add --no-cache mariadb-client
+
+COPY galera-check.sh /usr/local/bin/galera-check.sh
+
+RUN chmod 0755 /usr/local/bin/galera-check.sh
+
+USER haproxy
