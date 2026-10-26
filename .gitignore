@@ -1,0 +1,34 @@
+# Credenciales / claves
+.env
+.env.*
+!.env.example
+**/*.pem
+**/*.key
+**/keyfile
+**/*keyfile*
+**/id_rsa*
+**/id_ed25519*
+**/credentials.json
+**/secrets.json
+*.p12
+*.pfx
+# Dependencias y caches
+node_modules/
+__pycache__/
+*.pyc
+.venv/
+venv/
+# Datos locales/volumenes (no publicar BD)
+**/data/
+**/volumes/
+*.sqlite
+*.db
+*.dump
+*.sql.gz
+# Sistema/IDE
+.DS_Store
+Thumbs.db
+.idea/
+.vscode/
+# Registros locales ruidosos; conservar tests/performance/results si contienen datos utiles
+*.log
